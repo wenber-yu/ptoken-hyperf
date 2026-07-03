@@ -33,13 +33,7 @@
         "hyperf/testing": "^3.2",
         "mockery/mockery": "^1.6"
     },
-    "repositories": [
-        {
-            "name": "ptoken-core",
-            "type": "path",
-            "url": "../ptoken-core"
-        }
-    ],
+
     "suggest": {
         "hyperf/database": "Required for TokenUser automatic User Model association"
     },

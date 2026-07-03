@@ -264,8 +264,8 @@ $tokenUser->setUser($customUser);
 
 ## 相关链接
 
-- [PToken Core](../ptoken-core) — 核心库文档
-- [PToken Laravel](../ptoken-laravel) — Laravel 集成包
+- [PToken Core](https://github.com/wenber-yu/ptoken-core) — 核心库文档
+- [PToken Laravel](https://github.com/wenber-yu/ptoken-laravel) — Laravel 集成包
 
 ## 许可证
 
