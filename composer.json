@@ -1,0 +1,67 @@
+{
+    "name": "wenber-yu/ptoken-hyperf",
+    "version": "0.1.1",
+    "description": "Hyperf integration for PToken - server-side token management with middleware.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "token",
+        "auth",
+        "hyperf",
+        "middleware",
+        "ptoken"
+    ],
+    "authors": [
+        {
+            "name": "wenbo"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": ">=8.3",
+        "wenber-yu/ptoken-core": "*",
+        "hyperf/di": "^3.0|^3.1|^3.2",
+        "hyperf/http-server": "^3.0|^3.1|^3.2",
+        "hyperf/command": "^3.0|^3.1|^3.2",
+        "psr/http-message": "^1.0|^2.0",
+        "psr/http-server-middleware": "^1.0",
+        "psr/simple-cache": "^2.0|^3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0",
+        "hyperf/testing": "^3.2",
+        "mockery/mockery": "^1.6"
+    },
+    "repositories": [
+        {
+            "name": "ptoken-core",
+            "type": "path",
+            "url": "../ptoken-core"
+        }
+    ],
+    "suggest": {
+        "hyperf/database": "Required for TokenUser automatic User Model association"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wenbo\\PToken\\Hyperf\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "PToken\\Hyperf\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "hyperf": {
+            "config": "Wenbo\\PToken\\Hyperf\\ConfigProvider"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
