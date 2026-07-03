@@ -1,6 +1,6 @@
 {
     "name": "wenber-yu/ptoken-hyperf",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "description": "Hyperf integration for PToken - server-side token management with middleware.",
     "type": "library",
     "license": "MIT",

@@ -123,8 +123,10 @@ class PTokenMiddleware implements MiddlewareInterface
         $config = $this->ptoken->getConfig();
 
         $tokenUser = new PTokenUser(
+            $tokenData['tokenId'] ?? '',
             $tokenData['userKey'],
             $tokenData['data'],
+            $tokenData['abilities'] ?? ['*'],
             $tokenData['createAt'],
             $tokenData['expireAt'],
             $config->user_model,
@@ -133,6 +135,7 @@ class PTokenMiddleware implements MiddlewareInterface
         return $request
             ->withAttribute('ptokenUser', $tokenUser)
             ->withAttribute('ptokenUserKey', $tokenData['userKey'])
-            ->withAttribute('ptokenData', $tokenData['data']);
+            ->withAttribute('ptokenData', $tokenData['data'])
+            ->withAttribute('ptokenAbilities', $tokenData['abilities'] ?? ['*']);
     }
 }

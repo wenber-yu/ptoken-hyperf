@@ -1,6 +1,6 @@
 # PToken Hyperf
 
-PToken 的 Hyperf 集成包，为 Hyperf 应用提供服务端 Token 认证能力。支持中间件认证、`#[PTokenAuth(exclude: true)]` 排除标记、User Model 自动关联等功能。
+PToken 的 Hyperf 集成包，为 Hyperf 应用提供服务端 Token 认证能力。支持中间件认证、Token 能力（abilities）检查、`#[PTokenAuth(exclude: true)]` 排除标记、User Model 自动关联等功能。
 
 ## 环境要求
 
@@ -198,12 +198,36 @@ public function logout()
 }
 ```
 
+## Token 能力检查
+
+认证通过后，可通过 `PTokenUser` 的 `tokenCan()` / `tokenCant()` 方法检查 Token 能力：
+
+```php
+public function updateProfile()
+{
+    $request = \Hyperf\Context\Context::get(\Psr\Http\Message\ServerRequestInterface::class);
+    $tokenUser = $request->getAttribute('ptokenUser');
+
+    // 检查 Token 是否有 write 能力
+    if ($tokenUser->tokenCant('write')) {
+        return ['code' => 403, 'message' => '无写入权限'];
+    }
+
+    // 或直接获取能力列表
+    $abilities = $request->getAttribute('ptokenAbilities');
+    // ['read', 'write', ...]
+}
+```
+
+> 能力不满足时也可抛出 `PTokenForbiddenException`（HTTP 403），配合全局异常处理器统一处理。
+
 ## 认证失败处理
 
 认证失败时，中间件抛出 `PTokenAuthException`，可在全局异常处理器中统一捕获：
 
 ```php
 use Wenbo\PToken\Hyperf\Exceptions\PTokenAuthException;
+use Wenbo\PToken\Exceptions\PTokenForbiddenException;
 
 // app/Exception/Handler/AppExceptionHandler.php
 public function handle(Throwable $throwable, ResponseInterface $response)
@@ -212,6 +236,15 @@ public function handle(Throwable $throwable, ResponseInterface $response)
         return $response->withStatus(401)->withBody(
             new \Hyperf\HttpMessage\Stream\SwooleStream(json_encode([
                 'code'    => 401,
+                'message' => $throwable->getMessage(),
+            ]))
+        );
+    }
+
+    if ($throwable instanceof PTokenForbiddenException) {
+        return $response->withStatus(403)->withBody(
+            new \Hyperf\HttpMessage\Stream\SwooleStream(json_encode([
+                'code'    => 403,
                 'message' => $throwable->getMessage(),
             ]))
         );

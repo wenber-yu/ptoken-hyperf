@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Wenbo\PToken\Hyperf;
 
-use Hyperf\DbConnection\Db;
-
 /**
  * Hyperf 版 TokenUser，通过配置的 userModel 类名自动关联 User Model。
  *
@@ -31,20 +29,24 @@ class PTokenUser extends \Wenbo\PToken\PTokenUser
     private bool $resolved = false;
 
     /**
-     * @param string      $userKey        用户标识
-     * @param mixed       $data           用户关联数据
-     * @param int         $createAt       Token 创建时间
-     * @param int         $expireAt       Token 过期时间
-     * @param string|null $userModelClass User Model 类名（FQCN），null 时不自动关联
+     * @param string        $tokenId        Token 唯一标识
+     * @param string        $userKey        用户标识
+     * @param mixed         $data           用户关联数据
+     * @param array<string> $abilities      Token 能力/作用域
+     * @param int           $createAt       Token 创建时间
+     * @param int           $expireAt       Token 过期时间
+     * @param string|null   $userModelClass User Model 类名（FQCN），null 时不自动关联
      */
     public function __construct(
+        string $tokenId,
         string $userKey,
         mixed $data,
+        array $abilities,
         int $createAt,
         int $expireAt,
-        ?string $userModelClass = null
+        ?string $userModelClass = null,
     ) {
-        parent::__construct($userKey, $data, $createAt, $expireAt);
+        parent::__construct($tokenId, $userKey, $data, $abilities, $createAt, $expireAt);
         $this->userModelClass = $userModelClass;
     }
 
