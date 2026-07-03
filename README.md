@@ -269,4 +269,4 @@ $tokenUser->setUser($customUser);
 
 ## 许可证
 
-MIT
+[MIT](LICENSE)
