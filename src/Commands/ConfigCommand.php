@@ -21,7 +21,7 @@ class ConfigCommand extends HyperfCommand
     public function handle(): int
     {
         $source = __DIR__ . '/../../../config/ptoken.php';
-        $target = BASE_PATH . '/config/autoload/ptoken.php';
+        $target = (defined('BASE_PATH') ? BASE_PATH : '') . '/config/autoload/ptoken.php';
 
         if (!file_exists($source)) {
             $this->error("源配置文件不存在：{$source}");

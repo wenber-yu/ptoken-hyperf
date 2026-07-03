@@ -28,7 +28,7 @@ class KeyCommand extends HyperfCommand
         $this->line("  <comment>{$key}</comment>");
 
         if ($this->input->getOption('env')) {
-            $envPath = BASE_PATH . '/.env';
+            $envPath = (defined('BASE_PATH') ? BASE_PATH : '') . '/.env';
 
             if (!file_exists($envPath)) {
                 $this->error('.env 文件不存在');

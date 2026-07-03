@@ -29,24 +29,26 @@ class PTokenUser extends \Wenbo\PToken\PTokenUser
     private bool $resolved = false;
 
     /**
-     * @param string        $tokenId        Token 唯一标识
-     * @param string        $userKey        用户标识
-     * @param mixed         $data           用户关联数据
-     * @param array<string> $abilities      Token 能力/作用域
-     * @param int           $createAt       Token 创建时间
-     * @param int           $expireAt       Token 过期时间
-     * @param string|null   $userModelClass User Model 类名（FQCN），null 时不自动关联
+     * @param string        $token_id        Token 唯一标识
+     * @param string        $user_key        用户标识
+     * @param mixed         $data            用户关联数据
+     * @param array<string> $abilities       Token 能力/作用域
+     * @param int           $create_at       Token 创建时间
+     * @param int           $expire_at       Token 过期时间
+     * @param string|null   $userModelClass  User Model 类名（FQCN），null 时不自动关联
+     * @param array{ip: string, user_agent: string, device_name: string}|null $device 设备信息
      */
     public function __construct(
-        string $tokenId,
-        string $userKey,
+        string $token_id,
+        string $user_key,
         mixed $data,
         array $abilities,
-        int $createAt,
-        int $expireAt,
+        int $create_at,
+        int $expire_at,
         ?string $userModelClass = null,
+        ?array $device = null,
     ) {
-        parent::__construct($tokenId, $userKey, $data, $abilities, $createAt, $expireAt);
+        parent::__construct($token_id, $user_key, $data, $abilities, $create_at, $expire_at, $device);
         $this->userModelClass = $userModelClass;
     }
 
@@ -69,8 +71,8 @@ class PTokenUser extends \Wenbo\PToken\PTokenUser
             return null;
         }
 
-        $this->resolvedUser = $this->userModelClass::findFromCache($this->userKey)
-                           ?? $this->userModelClass::find($this->userKey);
+        $this->resolvedUser = $this->userModelClass::findFromCache($this->user_key)
+                           ?? $this->userModelClass::find($this->user_key);
 
         return $this->resolvedUser;
     }

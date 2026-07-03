@@ -59,7 +59,7 @@ class ConfigProvider
                     'id'          => 'ptoken',
                     'description' => 'PToken configuration file',
                     'source'      => __DIR__ . '/../../config/ptoken.php',
-                    'destination' => BASE_PATH . '/config/autoload/ptoken.php',
+                    'destination' => (defined('BASE_PATH') ? BASE_PATH : '') . '/config/autoload/ptoken.php',
                 ],
             ],
         ];

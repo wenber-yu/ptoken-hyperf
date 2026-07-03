@@ -33,7 +33,6 @@ final class MiddlewareTest extends TestCase
         $this->config = new PTokenConfig();
         $this->config->auth_exclude_paths = [];
         $this->config->timeout = 604800;
-        $this->config->max_refresh = 86400;
         $this->config->encrypt_key = '12345678901234567890123456789012';
 
         $this->ptoken = Mockery::mock(PToken::class);
@@ -73,6 +72,11 @@ final class MiddlewareTest extends TestCase
         return $request;
     }
 
+    private function makePsrResponse(): ResponseInterface
+    {
+        return Mockery::mock(ResponseInterface::class);
+    }
+
     // ─── 测试用例 ────────────────────────────────────────────────────
 
     public function testNoAuthorizationHeaderThrowsException(): void
@@ -91,7 +95,9 @@ final class MiddlewareTest extends TestCase
 
     public function testInvalidTokenThrowsException(): void
     {
-        $this->ptoken->shouldReceive('get')->with('bad-token')->andReturn(null);
+        $this->ptoken->shouldReceive('get')
+            ->with('bad-token')
+            ->andReturn(null);
 
         $request = $this->makeRequest(['header' => 'Bearer bad-token']);
         $handler = Mockery::mock(RequestHandlerInterface::class);
@@ -108,15 +114,19 @@ final class MiddlewareTest extends TestCase
     public function testValidTokenCallsHandlerWithPtokenUserAttribute(): void
     {
         $tokenData = [
-            'userKey'  => 'user_123',
+            'token_id'  => 'tid_123',
+            'user_key'  => 'user_123',
             'data'     => ['role' => 'admin'],
-            'createAt' => time(),
-            'expireAt' => time() + 3600,
+            'abilities' => ['*'],
+            'create_at' => time(),
+            'expire_at' => time() + 3600,
         ];
 
-        $this->ptoken->shouldReceive('get')->with('valid-token')->andReturn($tokenData);
+        $this->ptoken->shouldReceive('get')
+            ->with('valid-token')
+            ->andReturn($tokenData);
 
-        $psrResponse = Mockery::mock(ResponseInterface::class);
+        $psrResponse = $this->makePsrResponse();
 
         $request = $this->makeRequest(['header' => 'Bearer valid-token']);
         $request->shouldReceive('withAttribute')->andReturnSelf();
@@ -138,7 +148,7 @@ final class MiddlewareTest extends TestCase
         $this->config->auth_exclude_paths = ['/api/public'];
 
         $request = $this->makeRequest(['header' => '', 'path' => '/api/public/info']);
-        $psrResponse = Mockery::mock(ResponseInterface::class);
+        $psrResponse = $this->makePsrResponse();
 
         $handler = Mockery::mock(RequestHandlerInterface::class);
         $handler->shouldReceive('handle')->once()->andReturn($psrResponse);
@@ -154,15 +164,19 @@ final class MiddlewareTest extends TestCase
         $this->config->multi_login = true;
 
         $tokenData = [
-            'userKey'  => 'user_456',
+            'token_id'  => 'tid_456',
+            'user_key'  => 'user_456',
             'data'     => null,
-            'createAt' => time(),
-            'expireAt' => time() + 7200,
+            'abilities' => ['*'],
+            'create_at' => time(),
+            'expire_at' => time() + 7200,
         ];
 
-        $this->ptoken->shouldReceive('get')->with('multi-token')->andReturn($tokenData);
+        $this->ptoken->shouldReceive('get')
+            ->with('multi-token')
+            ->andReturn($tokenData);
 
-        $psrResponse = Mockery::mock(ResponseInterface::class);
+        $psrResponse = $this->makePsrResponse();
         $handler = Mockery::mock(RequestHandlerInterface::class);
         $handler->shouldReceive('handle')->once()->andReturn($psrResponse);
 
@@ -182,7 +196,7 @@ final class MiddlewareTest extends TestCase
             ->with('Hyperf\HttpServer\Router\Dispatched')
             ->andReturn(null);
 
-        $psrResponse = Mockery::mock(ResponseInterface::class);
+        $psrResponse = $this->makePsrResponse();
         $handler = Mockery::mock(RequestHandlerInterface::class);
         $handler->shouldReceive('handle')->once()->with($request)->andReturn($psrResponse);
 
@@ -195,15 +209,19 @@ final class MiddlewareTest extends TestCase
     public function testTokenFromQueryString(): void
     {
         $tokenData = [
-            'userKey'  => 'user_qs',
+            'token_id'  => 'tid_qs',
+            'user_key'  => 'user_qs',
             'data'     => null,
-            'createAt' => time(),
-            'expireAt' => time() + 3600,
+            'abilities' => ['*'],
+            'create_at' => time(),
+            'expire_at' => time() + 3600,
         ];
 
-        $this->ptoken->shouldReceive('get')->with('qs-token')->andReturn($tokenData);
+        $this->ptoken->shouldReceive('get')
+            ->with('qs-token')
+            ->andReturn($tokenData);
 
-        $psrResponse = Mockery::mock(ResponseInterface::class);
+        $psrResponse = $this->makePsrResponse();
         $handler = Mockery::mock(RequestHandlerInterface::class);
         $handler->shouldReceive('handle')->once()->andReturn($psrResponse);
 
@@ -215,4 +233,5 @@ final class MiddlewareTest extends TestCase
 
         $this->assertSame($psrResponse, $response);
     }
+
 }

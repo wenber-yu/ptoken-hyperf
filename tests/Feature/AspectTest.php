@@ -80,7 +80,6 @@ final class AspectTest extends TestCase
         $this->config = new PTokenConfig();
         $this->config->auth_exclude_paths = [];
         $this->config->timeout = 604800;
-        $this->config->max_refresh = 86400;
         $this->config->encrypt_key = '12345678901234567890123456789012';
 
         $this->ptoken = Mockery::mock(PToken::class);

@@ -17,12 +17,12 @@ use Wenbo\PToken\PToken;
 
 class PTokenMiddleware implements MiddlewareInterface
 {
-    private const string TOKEN_HEADER = 'Authorization';
     private const string TOKEN_PREFIX = 'Bearer ';
 
     public function __construct(
         private readonly PToken $ptoken,
-    ) {}
+    ) {
+    }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
@@ -36,13 +36,25 @@ class PTokenMiddleware implements MiddlewareInterface
         }
 
         $tokenData = $this->ptoken->get($token);
+
         if ($tokenData === null) {
             throw new PTokenAuthException('Token is invalid or expired');
         }
 
+        $new_token = $tokenData['new_token'] ?? null;
+        unset($tokenData['new_token']);
+
         $request = $this->injectTokenUser($request, $tokenData);
 
-        return $handler->handle($request);
+        $response = $handler->handle($request);
+
+        // Inject new token header if token was rotated
+        if ($new_token !== null) {
+            $headerName = $this->ptoken->getConfig()->new_token_header;
+            $response = $response->withHeader($headerName, $new_token);
+        }
+
+        return $response;
     }
 
     private function shouldSkip(ServerRequestInterface $request): bool
@@ -86,7 +98,7 @@ class PTokenMiddleware implements MiddlewareInterface
         }
 
         $methodAnnotation = AnnotationCollector::getClassMethodAnnotation($class, $method);
-        $classAnnotation  = AnnotationCollector::getClassAnnotation($class, PTokenAuth::class);
+        $classAnnotation = AnnotationCollector::getClassAnnotation($class, PTokenAuth::class);
 
         return (isset($methodAnnotation[PTokenAuth::class]) && $methodAnnotation[PTokenAuth::class]->exclude)
             || ($classAnnotation instanceof PTokenAuth && $classAnnotation->exclude);
@@ -107,7 +119,8 @@ class PTokenMiddleware implements MiddlewareInterface
 
     private function extractToken(ServerRequestInterface $request): ?string
     {
-        $header = $request->getHeaderLine(self::TOKEN_HEADER);
+        $headerName = $this->ptoken->getConfig()->token_header;
+        $header = $request->getHeaderLine($headerName);
 
         if ($header !== '') {
             return str_starts_with($header, self::TOKEN_PREFIX)
@@ -123,18 +136,19 @@ class PTokenMiddleware implements MiddlewareInterface
         $config = $this->ptoken->getConfig();
 
         $tokenUser = new PTokenUser(
-            $tokenData['tokenId'] ?? '',
-            $tokenData['userKey'],
+            $tokenData['token_id'] ?? '',
+            $tokenData['user_key'],
             $tokenData['data'],
             $tokenData['abilities'] ?? ['*'],
-            $tokenData['createAt'],
-            $tokenData['expireAt'],
+            $tokenData['create_at'],
+            $tokenData['expire_at'],
             $config->user_model,
+            $tokenData['device'] ?? null,
         );
 
         return $request
             ->withAttribute('ptokenUser', $tokenUser)
-            ->withAttribute('ptokenUserKey', $tokenData['userKey'])
+            ->withAttribute('ptokenUserKey', $tokenData['user_key'])
             ->withAttribute('ptokenData', $tokenData['data'])
             ->withAttribute('ptokenAbilities', $tokenData['abilities'] ?? ['*']);
     }

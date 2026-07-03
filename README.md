@@ -148,12 +148,15 @@ public function login()
     }
 
     $ptoken = \Hyperf\Context\ApplicationContext::getContainer()->get(\Wenbo\PToken\PToken::class);
-    $token = $ptoken->generate((string)$user->id, [
+    $result = $ptoken->generate((string)$user->id, ['*'], [
         'name'  => $user->name,
         'email' => $user->email,
     ]);
 
-    return ['token' => $token];
+    return [
+        'token'        => $result['token'],
+        'refreshToken' => $result['refreshToken'],
+    ];
 }
 ```
 
